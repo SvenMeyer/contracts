@@ -3,49 +3,49 @@ const truffleAssert = require('truffle-assertions');
 
 const DigiStake = artifacts.require("DigiStake");
 const DigiToken = artifacts.require("DigiToken");
-const StableToken = artifacts.require("StableToken");
+const RewardToken = artifacts.require("POLSltc");
 
 contract('DigiStake', function (accounts) {
 
   beforeEach(async function () {
     // Deploy
-    this.digiToken = await DigiToken.new({ from: accounts[0] });
-    await this.digiToken.release({ from: accounts[0] });
-    this.stableToken = await StableToken.new({ from: accounts[0] });
+    this.stakeToken = await DigiToken.new({ from: accounts[0] });
+    await this.stakeToken.release({ from: accounts[0] });
+    this.rewardToken = await RewardToken.new({ from: accounts[0] });
 
     this.digiStake = await DigiStake.new(
-      this.digiToken.address,
-      this.stableToken.address,
+      this.stakeToken.address,
+      this.rewardToken.address,
       { from: accounts[0] }
     );
 
     // Transfer
     const digiAmount = '10000000000000000000'; // 100.00
-    await this.digiToken.transfer(
+    await this.stakeToken.transfer(
       accounts[1],
       digiAmount,
       { from: accounts[0] }
     );
-    await this.digiToken.transfer(
+    await this.stakeToken.transfer(
       accounts[2],
       digiAmount,
       { from: accounts[0] }
     );
 
     this.rewardsAmount = '100000000000000000000'; // 1000.00
-    await this.stableToken.transfer(
+    await this.rewardToken.transfer(
       this.digiStake.address,
       this.rewardsAmount,
       { from: accounts[0] }
     );
 
     // Permissions
-    await this.digiToken.approve(
+    await this.stakeToken.approve(
       this.digiStake.address,
       digiAmount,
       { from: accounts[1] }
     );
-    await this.digiToken.approve(
+    await this.stakeToken.approve(
       this.digiStake.address,
       digiAmount,
       { from: accounts[2] }
@@ -54,7 +54,7 @@ contract('DigiStake', function (accounts) {
   });
 
   describe('Stake', function () {
-    
+
     it('on stake', async function() {
       const digiAmount = '1000000000000000000'; // 10.00
       await this.digiStake.stake(
@@ -83,7 +83,7 @@ contract('DigiStake', function (accounts) {
         { from: accounts[1] }
       );
 
-      const stableBalanceAfterWithdraw = await this.stableToken.balanceOf(accounts[1]);
+      const stableBalanceAfterWithdraw = await this.rewardToken.balanceOf(accounts[1]);
       assert.equal(
         stableBalanceAfterWithdraw.toString(),
         this.rewardsAmount,
@@ -117,13 +117,13 @@ contract('DigiStake', function (accounts) {
         'stake value is not correct'
       );
     });
-  
+
   });
 
   describe('Unstake', function () {
-    
+
     it('on withdraw', async function() {
-      const digiBalanceBeforeWithdraw = await this.digiToken.balanceOf(accounts[1]);
+      const digiBalanceBeforeWithdraw = await this.stakeToken.balanceOf(accounts[1]);
 
       const digiAmount = '1000000000000000000'; // 10.00
       await this.digiStake.stake(
@@ -135,14 +135,14 @@ contract('DigiStake', function (accounts) {
         { from: accounts[1] }
       );
 
-      const digiBalanceAfterWithdraw = await this.digiToken.balanceOf(accounts[1]);
+      const digiBalanceAfterWithdraw = await this.stakeToken.balanceOf(accounts[1]);
       assert.equal(
         digiBalanceAfterWithdraw.toString(),
         digiBalanceBeforeWithdraw,
         'Stake not recovered'
       );
 
-      const stableBalanceAfterWithdraw = await this.stableToken.balanceOf(accounts[1]);
+      const stableBalanceAfterWithdraw = await this.rewardToken.balanceOf(accounts[1]);
       assert.equal(
         stableBalanceAfterWithdraw.toString(),
         '100000000000000000000',
@@ -170,7 +170,7 @@ contract('DigiStake', function (accounts) {
         { from: accounts[1] }
       );
 
-      const stableBalanceAfterWithdraw = await this.stableToken.balanceOf(accounts[1]);
+      const stableBalanceAfterWithdraw = await this.rewardToken.balanceOf(accounts[1]);
       assert.equal(
         stableBalanceAfterWithdraw.toString(),
         this.rewardsAmount,
@@ -236,9 +236,9 @@ contract('DigiStake', function (accounts) {
         { from: accounts[2] }
       );
 
-      const stableBalanceOneAfterWithdraw = await this.stableToken.balanceOf(accounts[1]);
-      const stableBalanceTwoAfterWithdraw = await this.stableToken.balanceOf(accounts[2]);
-      
+      const stableBalanceOneAfterWithdraw = await this.rewardToken.balanceOf(accounts[1]);
+      const stableBalanceTwoAfterWithdraw = await this.rewardToken.balanceOf(accounts[2]);
+
       assert.equal(
         stableBalanceOneAfterWithdraw.toString(),
         sumStrings(0, this.rewardsAmount / 2),
@@ -263,7 +263,7 @@ contract('DigiStake', function (accounts) {
         digiAmountTwo,
         { from: accounts[2] }
       );
-      
+
       await this.digiStake.distribute();
 
       await this.digiStake.withdraw(
@@ -273,8 +273,8 @@ contract('DigiStake', function (accounts) {
         { from: accounts[2] }
       );
 
-      const stableBalanceOneAfterWithdraw = await this.stableToken.balanceOf(accounts[1]);
-      const stableBalanceTwoAfterWithdraw = await this.stableToken.balanceOf(accounts[2]);
+      const stableBalanceOneAfterWithdraw = await this.rewardToken.balanceOf(accounts[1]);
+      const stableBalanceTwoAfterWithdraw = await this.rewardToken.balanceOf(accounts[2]);
 
       assert.equal(
         stableBalanceOneAfterWithdraw.toString(),
@@ -303,7 +303,7 @@ contract('DigiStake', function (accounts) {
 
       await this.digiStake.distribute();
 
-      await this.stableToken.transfer(
+      await this.rewardToken.transfer(
         this.digiStake.address,
         this.rewardsAmount,
         { from: accounts[0] }
@@ -318,8 +318,8 @@ contract('DigiStake', function (accounts) {
         { from: accounts[2] }
       );
 
-      const stableBalanceOneAfterWithdraw = await this.stableToken.balanceOf(accounts[1]);
-      const stableBalanceTwoAfterWithdraw = await this.stableToken.balanceOf(accounts[2]);
+      const stableBalanceOneAfterWithdraw = await this.rewardToken.balanceOf(accounts[1]);
+      const stableBalanceTwoAfterWithdraw = await this.rewardToken.balanceOf(accounts[2]);
 
       assert.equal(
         stableBalanceOneAfterWithdraw.toString(),
@@ -338,10 +338,10 @@ contract('DigiStake', function (accounts) {
 
 });
 
-function sumStrings(a,b) { 
+function sumStrings(a,b) {
   return ((BigInt(a)) + BigInt(b)).toString();
 }
 
-function subStrings(a,b) { 
+function subStrings(a,b) {
   return ((BigInt(a)) - BigInt(b)).toString();
 }
