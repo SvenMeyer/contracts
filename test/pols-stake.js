@@ -1,53 +1,53 @@
 const { expectRevert, expectEvent, BN, time } = require('@openzeppelin/test-helpers');
 const truffleAssert = require('truffle-assertions');
 
-const DigiStake = artifacts.require("DigiStake");
-const DigiToken = artifacts.require("DigiToken");
-const RewardToken = artifacts.require("POLSltc");
+const PolsStake = artifacts.require("PolsStake");
+const PolsToken = artifacts.require("PolkastarterToken");
+const RewardToken = artifacts.require("POLSL");
 
-contract('DigiStake', function (accounts) {
+contract('PolsStake', function (accounts) {
 
   beforeEach(async function () {
     // Deploy
-    this.stakeToken = await DigiToken.new({ from: accounts[0] });
-    await this.stakeToken.release({ from: accounts[0] });
+    this.stakeToken  = await PolsToken.new({ from: accounts[0] });
+    // await this.stakeToken.release({ from: accounts[0] });
     this.rewardToken = await RewardToken.new({ from: accounts[0] });
 
-    this.digiStake = await DigiStake.new(
+    this.polsStake = await PolsStake.new(
       this.stakeToken.address,
       this.rewardToken.address,
       { from: accounts[0] }
     );
 
     // Transfer
-    const digiAmount = '10000000000000000000'; // 100.00
+    const polsAmount = '10000000000000000000'; // 100.00
     await this.stakeToken.transfer(
       accounts[1],
-      digiAmount,
+      polsAmount,
       { from: accounts[0] }
     );
     await this.stakeToken.transfer(
       accounts[2],
-      digiAmount,
+      polsAmount,
       { from: accounts[0] }
     );
 
     this.rewardsAmount = '100000000000000000000'; // 1000.00
     await this.rewardToken.transfer(
-      this.digiStake.address,
+      this.polsStake.address,
       this.rewardsAmount,
       { from: accounts[0] }
     );
 
     // Permissions
     await this.stakeToken.approve(
-      this.digiStake.address,
-      digiAmount,
+      this.polsStake.address,
+      polsAmount,
       { from: accounts[1] }
     );
     await this.stakeToken.approve(
-      this.digiStake.address,
-      digiAmount,
+      this.polsStake.address,
+      polsAmount,
       { from: accounts[2] }
     );
 
@@ -56,30 +56,30 @@ contract('DigiStake', function (accounts) {
   describe('Stake', function () {
 
     it('on stake', async function() {
-      const digiAmount = '1000000000000000000'; // 10.00
-      await this.digiStake.stake(
-        digiAmount,
+      const polsAmount = '1000000000000000000'; // 10.00
+      await this.polsStake.stake(
+        polsAmount,
         { from: accounts[1] }
       );
 
-      const stake = await this.digiStake.stakeMap.call(accounts[1]).valueOf();
+      const stake = await this.polsStake.stakeMap.call(accounts[1]).valueOf();
       assert.equal(
         stake,
-        digiAmount,
+        polsAmount,
         'stake value is not correct'
       );
     });
 
     it('claim', async function() {
-      const digiAmount = '1000000000000000000'; // 10.00
-      await this.digiStake.stake(
-        digiAmount,
+      const polsAmount = '1000000000000000000'; // 10.00
+      await this.polsStake.stake(
+        polsAmount,
         { from: accounts[1] }
       );
 
-      await this.digiStake.distribute();
+      await this.polsStake.distribute();
 
-      await this.digiStake.claim(
+      await this.polsStake.claim(
         { from: accounts[1] }
       );
 
@@ -90,27 +90,27 @@ contract('DigiStake', function (accounts) {
         'Rewards not received'
       );
 
-      const stake = await this.digiStake.stakeMap.call(accounts[1]).valueOf();
+      const stake = await this.polsStake.stakeMap.call(accounts[1]).valueOf();
       assert.equal(
         stake.toString(),
-        digiAmount.toString(),
+        polsAmount.toString(),
         'stake value is not correct'
       );
     });
 
     it('staked', async function() {
-      const digiAmount = '1000000000000000000'; // 10.00
-      await this.digiStake.stake(
-        digiAmount,
+      const polsAmount = '1000000000000000000'; // 10.00
+      await this.polsStake.stake(
+        polsAmount,
         { from: accounts[1] }
       );
 
-      const staked = await this.digiStake.staked.call(
+      const staked = await this.polsStake.staked.call(
         accounts[1],
         { from: accounts[1] }
       );
 
-      const stake = await this.digiStake.stakeMap.call(accounts[1]).valueOf();
+      const stake = await this.polsStake.stakeMap.call(accounts[1]).valueOf();
       assert.equal(
         stake.toString(),
         staked.toString(),
@@ -123,22 +123,22 @@ contract('DigiStake', function (accounts) {
   describe('Unstake', function () {
 
     it('on withdraw', async function() {
-      const digiBalanceBeforeWithdraw = await this.stakeToken.balanceOf(accounts[1]);
+      const polsBalanceBeforeWithdraw = await this.stakeToken.balanceOf(accounts[1]);
 
-      const digiAmount = '1000000000000000000'; // 10.00
-      await this.digiStake.stake(
-        digiAmount,
+      const polsAmount = '1000000000000000000'; // 10.00
+      await this.polsStake.stake(
+        polsAmount,
         { from: accounts[1] }
       );
 
-      await this.digiStake.withdraw(
+      await this.polsStake.withdraw(
         { from: accounts[1] }
       );
 
-      const digiBalanceAfterWithdraw = await this.stakeToken.balanceOf(accounts[1]);
+      const polsBalanceAfterWithdraw = await this.stakeToken.balanceOf(accounts[1]);
       assert.equal(
-        digiBalanceAfterWithdraw.toString(),
-        digiBalanceBeforeWithdraw,
+        polsBalanceAfterWithdraw.toString(),
+        polsBalanceBeforeWithdraw,
         'Stake not recovered'
       );
 
@@ -149,7 +149,7 @@ contract('DigiStake', function (accounts) {
         'Rewards not received'
       );
 
-      const stake = await this.digiStake.stakeMap.call(accounts[1]).valueOf();
+      const stake = await this.polsStake.stakeMap.call(accounts[1]).valueOf();
       assert.equal(
         stake.toString(),
         0,
@@ -158,15 +158,15 @@ contract('DigiStake', function (accounts) {
     });
 
     it('gets rewards', async function() {
-      const digiAmount = '1000000000000000000'; // 10.00
-      await this.digiStake.stake(
-        digiAmount,
+      const polsAmount = '1000000000000000000'; // 10.00
+      await this.polsStake.stake(
+        polsAmount,
         { from: accounts[1] }
       );
 
-      await this.digiStake.distribute();
+      await this.polsStake.distribute();
 
-      await this.digiStake.withdraw(
+      await this.polsStake.withdraw(
         { from: accounts[1] }
       );
 
@@ -177,7 +177,7 @@ contract('DigiStake', function (accounts) {
         'Rewards not received'
       );
 
-      const stake = await this.digiStake.stakeMap.call(accounts[1]).valueOf();
+      const stake = await this.polsStake.stakeMap.call(accounts[1]).valueOf();
       assert.equal(
         stake,
         0,
@@ -186,29 +186,29 @@ contract('DigiStake', function (accounts) {
     });
 
     it('gets rewards and re-stake', async function() {
-      const digiAmount = '1000000000000000000'; // 10.00
-      await this.digiStake.stake(
-        digiAmount,
+      const polsAmount = '1000000000000000000'; // 10.00
+      await this.polsStake.stake(
+        polsAmount,
         { from: accounts[1] }
       );
-      await this.digiStake.stake(
-        digiAmount,
+      await this.polsStake.stake(
+        polsAmount,
         { from: accounts[2] }
       );
 
-      await this.digiStake.distribute();
+      await this.polsStake.distribute();
 
-      await this.digiStake.withdraw(
+      await this.polsStake.withdraw(
         { from: accounts[1] }
       );
 
-      await this.digiStake.stake(
-        digiAmount,
+      await this.polsStake.stake(
+        polsAmount,
         { from: accounts[1] }
       );
 
 
-      const rewards = await this.digiStake.calculateReward.call(accounts[1], { from: accounts[1] });
+      const rewards = await this.polsStake.calculateReward.call(accounts[1], { from: accounts[1] });
       assert.equal(
         rewards.toString(),
         '0',
@@ -217,22 +217,22 @@ contract('DigiStake', function (accounts) {
     });
 
     it('gets rewards when two equal deposits', async function() {
-      const digiAmount = '1000000000000000000'; // 10.00
-      await this.digiStake.stake(
-        digiAmount,
+      const polsAmount = '1000000000000000000'; // 10.00
+      await this.polsStake.stake(
+        polsAmount,
         { from: accounts[1] }
       );
-      await this.digiStake.stake(
-        digiAmount,
+      await this.polsStake.stake(
+        polsAmount,
         { from: accounts[2] }
       );
 
-      await this.digiStake.distribute();
+      await this.polsStake.distribute();
 
-      await this.digiStake.withdraw(
+      await this.polsStake.withdraw(
         { from: accounts[1] }
       );
-      await this.digiStake.withdraw(
+      await this.polsStake.withdraw(
         { from: accounts[2] }
       );
 
@@ -253,23 +253,23 @@ contract('DigiStake', function (accounts) {
     });
 
     it('gets rewards when not equal deposits', async function() {
-      const digiAmountOne = '1000000000000000000'; // 10.00
-      await this.digiStake.stake(
-        digiAmountOne,
+      const polsAmountOne = '1000000000000000000'; // 10.00
+      await this.polsStake.stake(
+        polsAmountOne,
         { from: accounts[1] }
       );
-      const digiAmountTwo = '500000000000000000'; // 5.00
-      await this.digiStake.stake(
-        digiAmountTwo,
+      const polsAmountTwo = '500000000000000000'; // 5.00
+      await this.polsStake.stake(
+        polsAmountTwo,
         { from: accounts[2] }
       );
 
-      await this.digiStake.distribute();
+      await this.polsStake.distribute();
 
-      await this.digiStake.withdraw(
+      await this.polsStake.withdraw(
         { from: accounts[1] }
       );
-      await this.digiStake.withdraw(
+      await this.polsStake.withdraw(
         { from: accounts[2] }
       );
 
@@ -290,31 +290,31 @@ contract('DigiStake', function (accounts) {
     });
 
     it('add more rewards and claim', async function() {
-      const digiAmountOne = '1000000000000000000'; // 10.00
-      await this.digiStake.stake(
-        digiAmountOne,
+      const polsAmountOne = '1000000000000000000'; // 10.00
+      await this.polsStake.stake(
+        polsAmountOne,
         { from: accounts[1] }
       );
-      const digiAmountTwo = '500000000000000000'; // 5.00
-      await this.digiStake.stake(
-        digiAmountTwo,
+      const polsAmountTwo = '500000000000000000'; // 5.00
+      await this.polsStake.stake(
+        polsAmountTwo,
         { from: accounts[2] }
       );
 
-      await this.digiStake.distribute();
+      await this.polsStake.distribute();
 
       await this.rewardToken.transfer(
-        this.digiStake.address,
+        this.polsStake.address,
         this.rewardsAmount,
         { from: accounts[0] }
       );
 
-      await this.digiStake.distribute();
+      await this.polsStake.distribute();
 
-      await this.digiStake.withdraw(
+      await this.polsStake.withdraw(
         { from: accounts[1] }
       );
-      await this.digiStake.withdraw(
+      await this.polsStake.withdraw(
         { from: accounts[2] }
       );
 

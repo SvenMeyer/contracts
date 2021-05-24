@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract DigiStake is Ownable, ReentrancyGuard {
+contract PolsStake is Ownable, ReentrancyGuard {
     using SafeMath for uint256;
     using SafeMath for uint8;
     using SafeMath for uint;
@@ -38,7 +38,7 @@ contract DigiStake is Ownable, ReentrancyGuard {
 
     function _stake(uint _amount) internal returns (bool){
         require(_amount != 0, "Amount can't be 0");
-        require(IERC20(stakingToken).transferFrom(msg.sender, address(this), _amount), "DigiStake: Must allow the ERC20 first");
+        require(IERC20(stakingToken).transferFrom(msg.sender, address(this), _amount), "PolsStake: Must allow the ERC20 first");
 
         if (stakeMap[msg.sender] == 0) {
             stakeMap[msg.sender] = _amount;
@@ -56,7 +56,7 @@ contract DigiStake is Ownable, ReentrancyGuard {
     * @dev pay out dividends to stakers, update how much per token each staker can claim
     */
     function distribute() public returns (bool) {
-        require(tokenTotalStaked != 0, "DigiStake: Total staked must be more than 0");
+        require(tokenTotalStaked != 0, "PolsStake: Total staked must be more than 0");
 
         uint256 currentBalance = IERC20(rewardToken).balanceOf(address(this));
 
@@ -88,13 +88,13 @@ contract DigiStake is Ownable, ReentrancyGuard {
     }
 
     function _withdraw() internal returns (bool){
-        require(stakeMap[msg.sender] > 0, "DigiStake: Amount can't be 0");
+        require(stakeMap[msg.sender] > 0, "PolsStake: Amount can't be 0");
         _claim();
         uint _amount = stakeMap[msg.sender];
 
         stakeMap[msg.sender] = 0;
         tokenTotalStaked = tokenTotalStaked.sub(_amount);
-        require(IERC20(stakingToken).transfer(msg.sender, _amount), "DigiStake: Transfer failed");
+        require(IERC20(stakingToken).transfer(msg.sender, _amount), "PolsStake: Transfer failed");
         emit Withdraw(msg.sender, _amount, getTime());
         return true;
     }
@@ -108,7 +108,7 @@ contract DigiStake is Ownable, ReentrancyGuard {
             return claimableAmount;
         }
         userClaimableRewardPerStake[msg.sender] = tokenCummulativeRewardPerStake;
-        require(IERC20(rewardToken).transfer(msg.sender, claimableAmount), "DigiStake: Transfer failed");
+        require(IERC20(rewardToken).transfer(msg.sender, claimableAmount), "PolsStake: Transfer failed");
 
         totalRewards = totalRewards.sub(claimableAmount);
 
