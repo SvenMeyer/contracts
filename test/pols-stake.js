@@ -83,9 +83,9 @@ contract('PolsStake', function (accounts) {
         { from: accounts[1] }
       );
 
-      const stableBalanceAfterWithdraw = await this.rewardToken.balanceOf(accounts[1]);
+      const rewardBalanceAfterWithdraw = await this.rewardToken.balanceOf(accounts[1]);
       assert.equal(
-        stableBalanceAfterWithdraw.toString(),
+        rewardBalanceAfterWithdraw.toString(),
         this.rewardsAmount,
         'Rewards not received'
       );
@@ -142,9 +142,9 @@ contract('PolsStake', function (accounts) {
         'Stake not recovered'
       );
 
-      const stableBalanceAfterWithdraw = await this.rewardToken.balanceOf(accounts[1]);
+      const rewardBalanceAfterWithdraw = await this.rewardToken.balanceOf(accounts[1]);
       assert.equal(
-        stableBalanceAfterWithdraw.toString(),
+        rewardBalanceAfterWithdraw.toString(),
         '100000000000000000000',
         'Rewards not received'
       );
@@ -170,9 +170,9 @@ contract('PolsStake', function (accounts) {
         { from: accounts[1] }
       );
 
-      const stableBalanceAfterWithdraw = await this.rewardToken.balanceOf(accounts[1]);
+      const rewardBalanceAfterWithdraw = await this.rewardToken.balanceOf(accounts[1]);
       assert.equal(
-        stableBalanceAfterWithdraw.toString(),
+        rewardBalanceAfterWithdraw.toString(),
         this.rewardsAmount,
         'Rewards not received'
       );
@@ -236,17 +236,17 @@ contract('PolsStake', function (accounts) {
         { from: accounts[2] }
       );
 
-      const stableBalanceOneAfterWithdraw = await this.rewardToken.balanceOf(accounts[1]);
-      const stableBalanceTwoAfterWithdraw = await this.rewardToken.balanceOf(accounts[2]);
+      const rewardBalanceOneAfterWithdraw = await this.rewardToken.balanceOf(accounts[1]);
+      const rewardBalanceTwoAfterWithdraw = await this.rewardToken.balanceOf(accounts[2]);
 
       assert.equal(
-        stableBalanceOneAfterWithdraw.toString(),
+        rewardBalanceOneAfterWithdraw.toString(),
         sumStrings(0, this.rewardsAmount / 2),
         'Rewards for Account 1 not correct'
       );
 
       assert.equal(
-        stableBalanceTwoAfterWithdraw.toString(),
+        rewardBalanceTwoAfterWithdraw.toString(),
         sumStrings(0, this.rewardsAmount / 2),
         'Rewards for Account 2 not correct'
       );
@@ -273,17 +273,17 @@ contract('PolsStake', function (accounts) {
         { from: accounts[2] }
       );
 
-      const stableBalanceOneAfterWithdraw = await this.rewardToken.balanceOf(accounts[1]);
-      const stableBalanceTwoAfterWithdraw = await this.rewardToken.balanceOf(accounts[2]);
+      const rewardBalanceOneAfterWithdraw = await this.rewardToken.balanceOf(accounts[1]);
+      const rewardBalanceTwoAfterWithdraw = await this.rewardToken.balanceOf(accounts[2]);
 
       assert.equal(
-        stableBalanceOneAfterWithdraw.toString(),
+        rewardBalanceOneAfterWithdraw.toString(),
         '66666666666666666666',
         'Rewards for Account 1 not correct'
       );
 
       assert.equal(
-        stableBalanceTwoAfterWithdraw.toString(),
+        rewardBalanceTwoAfterWithdraw.toString(),
         '33333333333333333333',
         'Rewards for Account 2 not correct'
       );
@@ -318,17 +318,17 @@ contract('PolsStake', function (accounts) {
         { from: accounts[2] }
       );
 
-      const stableBalanceOneAfterWithdraw = await this.rewardToken.balanceOf(accounts[1]);
-      const stableBalanceTwoAfterWithdraw = await this.rewardToken.balanceOf(accounts[2]);
+      const rewardBalanceOneAfterWithdraw = await this.rewardToken.balanceOf(accounts[1]);
+      const rewardBalanceTwoAfterWithdraw = await this.rewardToken.balanceOf(accounts[2]);
 
       assert.equal(
-        stableBalanceOneAfterWithdraw.toString(),
+        rewardBalanceOneAfterWithdraw.toString(),
         sumStrings('66666666666666666666', '66666666666666666666'),
         'Rewards for Account 1 not correct'
       );
 
       assert.equal(
-        stableBalanceTwoAfterWithdraw.toString(),
+        rewardBalanceTwoAfterWithdraw.toString(),
         sumStrings('33333333333333333333', '33333333333333333333'),
         'Rewards for Account 2 not correct'
       );
