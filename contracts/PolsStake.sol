@@ -21,9 +21,9 @@ contract PolsStake is Ownable, ReentrancyGuard {
     mapping (address => uint) public stakeMap;
     mapping (address => uint) public userClaimableRewardPerStake;
 
-    uint256 public totalRewards;
+    uint256 public totalRewards;                    // sum of all rewards which have already been distributed and which users can claim
     uint256 public tokenTotalStaked;
-    uint256 public tokenCummulativeRewardPerStake;
+    uint256 public tokenCummulativeRewardPerStake;  //
     address public stakingToken;
     address public rewardToken;
 
@@ -54,6 +54,7 @@ contract PolsStake is Ownable, ReentrancyGuard {
 
     /**
     * @dev pay out dividends to stakers, update how much per token each staker can claim
+    * @dev only called by calculateReward(address _staker)
     */
     function distribute() public returns (bool) {
         require(tokenTotalStaked != 0, "PolsStake: Total staked must be more than 0");
@@ -65,7 +66,7 @@ contract PolsStake is Ownable, ReentrancyGuard {
         }
 
         uint256 reward = currentBalance.sub(totalRewards);
-        totalRewards = totalRewards.add(reward);
+        totalRewards = totalRewards.add(reward);  // => totalRewards == currentBalance ?
 
         if (totalRewards == 0) {
             return false;
@@ -76,6 +77,10 @@ contract PolsStake is Ownable, ReentrancyGuard {
         return true;
     }
 
+    /**
+    * @dev
+    * @dev only called by _claim()
+    */
     function calculateReward(address _staker) public returns (uint) {
         distribute();
 
@@ -118,7 +123,7 @@ contract PolsStake is Ownable, ReentrancyGuard {
 
     function getTime() internal view returns (uint256) {
         // solhint-disable-next-line not-rely-on-time
-        return now;
+        return block.timestamp;  // now; (Solidity ^0.7.0 deprecates the now keyword)
     }
 
     function stake(uint _amount) external nonReentrant returns (bool) {
